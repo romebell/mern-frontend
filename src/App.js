@@ -1,5 +1,5 @@
 // Imports
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import jwt_decode from 'jwt-decode';
 import setAuthToken from './utils/setAuthToken';
@@ -15,6 +15,14 @@ import Login from './components/Login';
 import About from './components/About';
 
 // Private route component
+const PrivateRoute = ({ component: Component, ...rest }) => {
+    console.log('This is a private route...')
+    let user = localStorage.getItem('jwtToken');
+
+    return <Route {...rest} render={ (props) => {
+        return user ? <Component {...rest} {...props} /> : <Redirect to='/login' />
+    }}/>
+}
 
 
 function App() {
@@ -52,8 +60,18 @@ function App() {
 
   return (
     <div className="App">
-      {/* <Navbar  /> */}
-      
+      <Navbar isAuth={isAuthenticated}  handleLogout={handleLogout} />
+      <div className="container mt-5">
+          <Switch>
+              {/* routes will go inside of here */}
+              <Route path='/signup' component={ Signup } />
+              <Route path='/login' 
+                render={ (props) => <Login {...props} nowCurrentUser={nowCurrentUser} setIsAuthenticated={setIsAuthenticated} /> } />
+              <Route path='/about' component={ About } />
+              <Route exact path='/' component={ Welcome } />
+              <PrivateRoute path='/profile' component={ Profile } user={currentUser} handleLogout={handleLogout} />
+          </Switch>
+      </div>
       <Footer />
     </div>
   );
